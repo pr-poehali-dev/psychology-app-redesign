@@ -1,83 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 
-type Screen = 'splash' | 'auth' | 'home' | 'diary' | 'profile' | 'meditation';
-type Mood = 'great' | 'good' | 'okay' | 'sad' | 'stressed';
+type Screen = 'welcome' | 'home' | 'sessions' | 'resources' | 'profile';
 
-interface DiaryEntry {
-  id: string;
-  date: string;
-  mood: Mood;
-  note: string;
-  tags: string[];
-  gratitude?: string;
-}
-
-interface Achievement {
+interface Session {
   id: string;
   title: string;
-  description: string;
-  icon: string;
-  unlocked: boolean;
-  progress: number;
-  maxProgress: number;
-}
-
-interface Habit {
-  id: string;
-  name: string;
-  icon: string;
-  streak: number;
-  completedToday: boolean;
+  date: string;
+  mood: string;
+  notes: string;
 }
 
 const Index = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
-  const [userName, setUserName] = useState('');
-  const [isLogin, setIsLogin] = useState(false);
-  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([
-    { id: '1', date: '2025-10-15', mood: 'good', note: 'Хороший день, много гуляла в парке. Встретила старую подругу.', tags: ['прогулка', 'друзья'], gratitude: 'Благодарна за солнечную погоду' },
-    { id: '2', date: '2025-10-16', mood: 'okay', note: 'Обычный рабочий день, немного устала', tags: ['работа'] },
-    { id: '3', date: '2025-10-17', mood: 'great', note: 'Отличный день! Закончила важный проект', tags: ['работа', 'успех'], gratitude: 'Благодарна за поддержку команды' },
+  const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
+  const [userName] = useState('Анна');
+  const [sessions] = useState<Session[]>([
+    { id: '1', title: 'Утренняя медитация', date: '2025-10-18', mood: '😊', notes: 'Отличное начало дня' },
+    { id: '2', title: 'Работа со стрессом', date: '2025-10-17', mood: '🙂', notes: 'Узнала новые техники' },
+    { id: '3', title: 'Вечерняя практика', date: '2025-10-16', mood: '😌', notes: 'Чувствую спокойствие' },
   ]);
-  const [newNote, setNewNote] = useState('');
-  const [newGratitude, setNewGratitude] = useState('');
-  const [selectedMood, setSelectedMood] = useState<Mood>('good');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathPhase, setBreathPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
-
-  const [habits, setHabits] = useState<Habit[]>([
-    { id: '1', name: 'Медитация', icon: 'Brain', streak: 5, completedToday: true },
-    { id: '2', name: 'Дневник', icon: 'PenLine', streak: 3, completedToday: false },
-    { id: '3', name: 'Благодарность', icon: 'Heart', streak: 7, completedToday: true },
-    { id: '4', name: 'Прогулка', icon: 'Footprints', streak: 2, completedToday: false },
-  ]);
-
-  const [achievements, setAchievements] = useState<Achievement[]>([
-    { id: '1', title: 'Первая запись', description: 'Создайте первую запись в дневнике', icon: '📝', unlocked: true, progress: 1, maxProgress: 1 },
-    { id: '2', title: 'Неделя практики', description: '7 дней подряд записей', icon: '🔥', unlocked: true, progress: 7, maxProgress: 7 },
-    { id: '3', title: 'Мастер благодарности', description: '10 записей с благодарностью', icon: '💖', unlocked: false, progress: 2, maxProgress: 10 },
-    { id: '4', title: 'Медитатор', description: '5 медитаций', icon: '🧘', unlocked: false, progress: 3, maxProgress: 5 },
-    { id: '5', title: 'Исследователь эмоций', description: 'Отметьте все виды настроения', icon: '🎭', unlocked: false, progress: 3, maxProgress: 5 },
-    { id: '6', title: 'Месяц роста', description: '30 дней практики', icon: '🏆', unlocked: false, progress: 7, maxProgress: 30 },
-  ]);
-
-  const availableTags = ['работа', 'друзья', 'семья', 'хобби', 'спорт', 'учёба', 'здоровье', 'успех', 'отдых', 'природа', 'творчество'];
-
-  useEffect(() => {
-    if (currentScreen === 'splash') {
-      const timer = setTimeout(() => setCurrentScreen('auth'), 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [currentScreen]);
 
   useEffect(() => {
     if (breathingActive) {
@@ -98,251 +46,55 @@ const Index = () => {
     }
   }, [breathingActive]);
 
-  const handleAuth = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (userName.trim()) {
-      setCurrentScreen('home');
-    }
-  };
-
-  const addDiaryEntry = () => {
-    if (newNote.trim()) {
-      const newEntry: DiaryEntry = {
-        id: Date.now().toString(),
-        date: new Date().toISOString().split('T')[0],
-        mood: selectedMood,
-        note: newNote,
-        tags: selectedTags,
-        gratitude: newGratitude || undefined,
-      };
-      setDiaryEntries([newEntry, ...diaryEntries]);
-      setNewNote('');
-      setNewGratitude('');
-      setSelectedMood('good');
-      setSelectedTags([]);
-    }
-  };
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
-  };
-
-  const toggleHabit = (habitId: string) => {
-    setHabits(prev =>
-      prev.map(h =>
-        h.id === habitId
-          ? { ...h, completedToday: !h.completedToday, streak: h.completedToday ? h.streak : h.streak + 1 }
-          : h
-      )
-    );
-  };
-
-  const moodEmojis: Record<Mood, string> = {
-    great: '😊',
-    good: '🙂',
-    okay: '😐',
-    sad: '😢',
-    stressed: '😰',
-  };
-
-  const moodLabels: Record<Mood, string> = {
-    great: 'Отлично',
-    good: 'Хорошо',
-    okay: 'Нормально',
-    sad: 'Грустно',
-    stressed: 'Тревожно',
-  };
-
-  const moodColors: Record<Mood, string> = {
-    great: 'bg-green-100 border-green-300 text-green-800',
-    good: 'bg-blue-100 border-blue-300 text-blue-800',
-    okay: 'bg-yellow-100 border-yellow-300 text-yellow-800',
-    sad: 'bg-purple-100 border-purple-300 text-purple-800',
-    stressed: 'bg-red-100 border-red-300 text-red-800',
-  };
-
-  const getMoodStats = () => {
-    const moodCounts: Record<Mood, number> = {
-      great: 0,
-      good: 0,
-      okay: 0,
-      sad: 0,
-      stressed: 0,
-    };
-    diaryEntries.forEach(entry => {
-      moodCounts[entry.mood]++;
-    });
-    return moodCounts;
-  };
-
-  const moodStats = getMoodStats();
-  const totalEntries = diaryEntries.length;
-
-  if (currentScreen === 'splash') {
+  if (currentScreen === 'welcome') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/30 to-accent/20 overflow-hidden relative">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-primary rounded-full blur-3xl animate-pulse-soft"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-secondary rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-1/2 left-1/2 w-36 h-36 bg-accent rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '0.5s' }}></div>
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 overflow-hidden relative">
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-primary rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-secondary rounded-full blur-3xl"></div>
         </div>
-        <div className="text-center animate-scale-in relative z-10">
-          <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center animate-pulse-soft shadow-2xl transform rotate-12 hover:rotate-0 transition-transform duration-500">
-            <Icon name="Heart" size={56} className="text-white" />
-          </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-3">
-            Спокойствие
-          </h1>
-          <p className="text-lg text-muted-foreground mb-2">Ваш помощник психологического здоровья</p>
-          <div className="flex items-center justify-center gap-1 mt-6">
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (currentScreen === 'auth') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/30 to-accent/20 p-4 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-20 w-40 h-40 bg-primary rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-20 w-48 h-48 bg-secondary rounded-full blur-3xl"></div>
-        </div>
-        <Card className="w-full max-w-md animate-fade-in shadow-2xl border-0 backdrop-blur-sm bg-card/95 relative z-10">
-          <CardHeader className="text-center space-y-2 pb-6">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-3 shadow-lg transform hover:scale-110 transition-transform duration-300">
-              <Icon name="Sparkles" size={36} className="text-white" />
-            </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              {isLogin ? 'С возвращением' : 'Добро пожаловать'}
-            </CardTitle>
-            <p className="text-muted-foreground">
-              {isLogin ? 'Войдите в свой аккаунт' : 'Создайте свой аккаунт для начала практики'}
-            </p>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAuth} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Имя</label>
-                <Input
-                  placeholder="Ваше имя"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  className="h-12 border-2 focus:border-primary transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Email</label>
-                <Input type="email" placeholder="example@mail.com" className="h-12 border-2 focus:border-primary transition-all" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Пароль</label>
-                <Input type="password" placeholder="••••••••" className="h-12 border-2 focus:border-primary transition-all" />
-              </div>
-              <Button type="submit" className="w-full h-12 text-base shadow-lg hover:shadow-xl transition-all hover:scale-105" size="lg">
-                {isLogin ? 'Войти' : 'Начать практику'}
-                <Icon name="ArrowRight" size={20} className="ml-2" />
-              </Button>
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
-              >
-                {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
-              </button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (currentScreen === 'meditation') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/20 to-accent/10 pb-20">
-        <div className="max-w-md mx-auto p-4 space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between pt-6 pb-4">
-            <button onClick={() => setCurrentScreen('home')} className="text-primary hover:scale-110 transition-transform">
-              <Icon name="ChevronLeft" size={28} />
-            </button>
-            <h1 className="text-2xl font-bold">Медитация</h1>
-            <div className="w-7" />
-          </div>
-
-          <Card className="shadow-xl border-2 border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon name="Wind" size={24} className="text-primary" />
-                Дыхательная практика
-              </CardTitle>
-              <CardDescription>Практика 4-4-6: вдох-задержка-выдох</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-center py-12 relative">
-                <div
-                  className={`absolute w-32 h-32 rounded-full transition-all duration-[4000ms] ${
-                    breathingActive && breathPhase === 'inhale' ? 'scale-150 bg-primary/30' : 'scale-100 bg-primary/10'
-                  } ${breathingActive && breathPhase === 'hold' ? 'scale-150 bg-secondary/30' : ''} ${
-                    breathingActive && breathPhase === 'exhale' ? 'scale-75 bg-accent/30' : ''
-                  }`}
-                ></div>
-                <div className="relative z-10 text-center">
-                  <div className="text-6xl mb-2">
-                    {breathPhase === 'inhale' && '🌬️'}
-                    {breathPhase === 'hold' && '⏸️'}
-                    {breathPhase === 'exhale' && '🍃'}
+        
+        <div className="max-w-md mx-auto min-h-screen flex flex-col relative z-10">
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="w-full space-y-8 animate-fade-in">
+              <div className="text-center space-y-4">
+                <div className="relative mx-auto w-80 h-80 mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-[3rem] transform rotate-6"></div>
+                  <div className="absolute inset-0 bg-white rounded-[3rem] shadow-2xl p-8 flex items-center justify-center">
+                    <img 
+                      src="https://cdn.poehali.dev/files/98fd46ec-8b11-4d9a-a1a4-24839ca8b328.jpg" 
+                      alt="Therapy illustration"
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
                   </div>
-                  <p className="text-lg font-semibold">
-                    {breathPhase === 'inhale' && 'Вдох'}
-                    {breathPhase === 'hold' && 'Задержка'}
-                    {breathPhase === 'exhale' && 'Выдох'}
-                  </p>
                 </div>
+                
+                <h1 className="text-5xl font-bold text-foreground leading-tight">
+                  Ваше пространство
+                  <br />
+                  <span className="text-primary">спокойствия</span>
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-sm mx-auto">
+                  Профессиональная поддержка и инструменты для вашего ментального здоровья
+                </p>
               </div>
-              <Button
-                onClick={() => setBreathingActive(!breathingActive)}
-                className="w-full h-14 text-lg shadow-lg"
-                variant={breathingActive ? 'outline' : 'default'}
-              >
-                {breathingActive ? 'Остановить' : 'Начать практику'}
-              </Button>
-            </CardContent>
-          </Card>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 cursor-pointer border-2 border-primary/20">
-              <CardContent className="p-6 text-center space-y-2">
-                <div className="text-4xl mb-2">🧘‍♀️</div>
-                <h3 className="font-semibold">Медитация</h3>
-                <p className="text-sm text-muted-foreground">5 мин</p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 cursor-pointer border-2 border-secondary/20">
-              <CardContent className="p-6 text-center space-y-2">
-                <div className="text-4xl mb-2">🎵</div>
-                <h3 className="font-semibold">Звуки природы</h3>
-                <p className="text-sm text-muted-foreground">10 мин</p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 cursor-pointer border-2 border-accent/30">
-              <CardContent className="p-6 text-center space-y-2">
-                <div className="text-4xl mb-2">✨</div>
-                <h3 className="font-semibold">Визуализация</h3>
-                <p className="text-sm text-muted-foreground">7 мин</p>
-              </CardContent>
-            </Card>
-            <Card className="shadow-lg hover:shadow-xl transition-all hover:scale-105 cursor-pointer border-2 border-primary/10">
-              <CardContent className="p-6 text-center space-y-2">
-                <div className="text-4xl mb-2">💤</div>
-                <h3 className="font-semibold">Для сна</h3>
-                <p className="text-sm text-muted-foreground">15 мин</p>
-              </CardContent>
-            </Card>
+              <div className="space-y-4">
+                <Button 
+                  onClick={() => setCurrentScreen('home')} 
+                  className="w-full h-14 text-lg rounded-2xl shadow-xl"
+                >
+                  Начать практику
+                  <Icon name="ArrowRight" size={20} className="ml-2" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full h-14 text-lg rounded-2xl border-2"
+                >
+                  Узнать больше
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -350,471 +102,430 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/20 to-accent/10 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 pb-24">
       {currentScreen === 'home' && (
-        <div className="max-w-md mx-auto p-4 space-y-6 animate-fade-in">
-          <div className="pt-6 pb-4">
-            <h1 className="text-4xl font-bold text-foreground mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Привет, {userName || 'друг'}! 👋
-            </h1>
-            <p className="text-muted-foreground text-lg">Как твоё настроение сегодня?</p>
+        <div className="max-w-md mx-auto p-5 space-y-6 animate-fade-in">
+          <div className="pt-8 pb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Добро пожаловать</p>
+                <h1 className="text-3xl font-bold text-foreground">{userName} 👋</h1>
+              </div>
+              <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                {userName[0]}
+              </div>
+            </div>
+            <p className="text-muted-foreground">Как вы себя чувствуете сегодня?</p>
           </div>
 
-          <div className="grid grid-cols-5 gap-2">
-            {(Object.keys(moodEmojis) as Mood[]).map((mood) => (
-              <button
-                key={mood}
-                onClick={() => setSelectedMood(mood)}
-                className={`p-4 rounded-2xl text-3xl transition-all hover:scale-110 shadow-md ${
-                  selectedMood === mood
-                    ? 'bg-primary/20 ring-2 ring-primary scale-105 shadow-lg'
-                    : 'bg-card hover:bg-muted hover:shadow-lg'
-                }`}
-                title={moodLabels[mood]}
-              >
-                {moodEmojis[mood]}
-              </button>
-            ))}
-          </div>
-
-          <Card className="shadow-xl border-2 border-primary/20 overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-primary via-secondary to-accent"></div>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon name="Sparkles" size={24} className="text-primary" />
-                Ежедневные практики
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {habits.map((habit) => (
-                <div
-                  key={habit.id}
-                  className={`flex items-center justify-between p-4 rounded-xl transition-all hover:scale-102 cursor-pointer border-2 ${
-                    habit.completedToday ? 'bg-primary/10 border-primary/30' : 'bg-muted/50 border-transparent'
+          <Card className="shadow-xl border-0 rounded-3xl overflow-hidden bg-gradient-to-br from-primary to-primary/80">
+            <CardContent className="p-8 text-white">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <p className="text-primary-foreground/80 text-sm mb-2">Ежедневная практика</p>
+                  <h2 className="text-2xl font-bold mb-1">Дыхательная медитация</h2>
+                  <p className="text-primary-foreground/90 text-sm">5 минут осознанности</p>
+                </div>
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                  <Icon name="Wind" size={24} />
+                </div>
+              </div>
+              
+              <div className="relative h-28 mb-6">
+                <div 
+                  className={`absolute inset-0 rounded-2xl transition-all duration-[4000ms] ${
+                    breathingActive && breathPhase === 'inhale' ? 'scale-100 bg-white/30' : 'scale-75 bg-white/10'
+                  } ${breathingActive && breathPhase === 'hold' ? 'scale-100 bg-white/40' : ''} ${
+                    breathingActive && breathPhase === 'exhale' ? 'scale-50 bg-white/20' : ''
                   }`}
-                  onClick={() => toggleHabit(habit.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${habit.completedToday ? 'bg-primary text-white' : 'bg-muted'}`}>
-                      <Icon name={habit.icon as any} size={20} />
+                ></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-4xl mb-2">
+                      {breathPhase === 'inhale' && '🌬️'}
+                      {breathPhase === 'hold' && '⏸️'}
+                      {breathPhase === 'exhale' && '🍃'}
                     </div>
-                    <div>
-                      <p className="font-semibold">{habit.name}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Icon name="Flame" size={12} className="text-orange-500" />
-                        {habit.streak} дней
-                      </p>
-                    </div>
+                    <p className="text-sm font-medium">
+                      {breathPhase === 'inhale' && 'Вдох...'}
+                      {breathPhase === 'hold' && 'Задержка...'}
+                      {breathPhase === 'exhale' && 'Выдох...'}
+                    </p>
                   </div>
-                  {habit.completedToday && (
-                    <Icon name="CheckCircle2" size={24} className="text-primary" />
-                  )}
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </div>
 
-          <Card className="shadow-xl border-2 border-secondary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon name="BookOpen" size={24} className="text-secondary" />
-                Быстрые действия
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
               <Button
-                variant="outline"
-                className="w-full justify-start h-14 text-base border-2 hover:border-primary hover:bg-primary/5 transition-all hover:scale-102"
-                onClick={() => setCurrentScreen('diary')}
+                onClick={() => setBreathingActive(!breathingActive)}
+                className="w-full bg-white text-primary hover:bg-white/90 h-12 rounded-xl font-semibold"
               >
-                <Icon name="PenLine" size={20} className="mr-3 text-primary" />
-                Записать мысли
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-14 text-base border-2 hover:border-secondary hover:bg-secondary/5 transition-all hover:scale-102"
-                onClick={() => setCurrentScreen('meditation')}
-              >
-                <Icon name="Headphones" size={20} className="mr-3 text-secondary" />
-                Медитация
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start h-14 text-base border-2 hover:border-accent hover:bg-accent/5 transition-all hover:scale-102"
-              >
-                <Icon name="MessageCircle" size={20} className="mr-3 text-accent" />
-                Чат с поддержкой
+                {breathingActive ? 'Остановить' : 'Начать практику'}
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 border-2 border-primary/10">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Ваш прогресс</span>
-                <Badge variant="secondary" className="text-sm">
-                  День {diaryEntries.length}
-                </Badge>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-foreground">Рекомендации</h3>
+              <button className="text-sm text-primary font-medium">Все</button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="shadow-lg border-0 rounded-2xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group">
+                <CardContent className="p-0">
+                  <div className="bg-gradient-to-br from-secondary/30 to-secondary/10 p-6 h-32 flex items-center justify-center">
+                    <div className="text-5xl group-hover:scale-110 transition-transform">📚</div>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-semibold mb-1">Библиотека</h4>
+                    <p className="text-xs text-muted-foreground">Статьи и книги</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg border-0 rounded-2xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group">
+                <CardContent className="p-0">
+                  <div className="bg-gradient-to-br from-accent/30 to-accent/10 p-6 h-32 flex items-center justify-center">
+                    <div className="text-5xl group-hover:scale-110 transition-transform">🎧</div>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-semibold mb-1">Аудио</h4>
+                    <p className="text-xs text-muted-foreground">Медитации</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg border-0 rounded-2xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group">
+                <CardContent className="p-0">
+                  <div className="bg-gradient-to-br from-primary/20 to-primary/5 p-6 h-32 flex items-center justify-center">
+                    <div className="text-5xl group-hover:scale-110 transition-transform">✍️</div>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-semibold mb-1">Дневник</h4>
+                    <p className="text-xs text-muted-foreground">Мысли и чувства</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg border-0 rounded-2xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group">
+                <CardContent className="p-0">
+                  <div className="bg-gradient-to-br from-green-100 to-green-50 p-6 h-32 flex items-center justify-center">
+                    <div className="text-5xl group-hover:scale-110 transition-transform">🌱</div>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-semibold mb-1">Рост</h4>
+                    <p className="text-xs text-muted-foreground">Упражнения</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <Card className="shadow-lg border-0 rounded-2xl">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base flex items-center justify-between">
+                Ваш прогресс
+                <Badge className="bg-primary/10 text-primary border-0">7 дней</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <Icon name="BookOpen" size={14} />
-                    Записей в дневнике
-                  </span>
-                  <span className="font-bold text-primary">{diaryEntries.length}/30</span>
+                  <span className="text-muted-foreground">Медитации</span>
+                  <span className="font-semibold text-primary">12/30</span>
                 </div>
-                <Progress value={(diaryEntries.length / 30) * 100} className="h-3 shadow-inner" />
+                <Progress value={40} className="h-2 bg-primary/10" />
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <Icon name="Flame" size={14} />
-                    Серия практик
-                  </span>
-                  <span className="font-bold text-secondary">7/30 дней</span>
+                  <span className="text-muted-foreground">Записей в дневнике</span>
+                  <span className="font-semibold text-accent">8/20</span>
                 </div>
-                <Progress value={23} className="h-3 shadow-inner" />
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-muted-foreground flex items-center gap-1">
-                    <Icon name="Trophy" size={14} />
-                    Достижения
-                  </span>
-                  <span className="font-bold text-accent">{achievements.filter(a => a.unlocked).length}/{achievements.length}</span>
-                </div>
-                <Progress value={(achievements.filter(a => a.unlocked).length / achievements.length) * 100} className="h-3 shadow-inner" />
+                <Progress value={40} className="h-2 bg-accent/10" />
               </div>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {currentScreen === 'diary' && (
-        <div className="max-w-md mx-auto p-4 space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between pt-6 pb-4">
-            <button onClick={() => setCurrentScreen('home')} className="text-primary hover:scale-110 transition-transform">
-              <Icon name="ChevronLeft" size={28} />
-            </button>
-            <h1 className="text-2xl font-bold">Дневник настроения</h1>
-            <div className="w-7" />
+      {currentScreen === 'sessions' && (
+        <div className="max-w-md mx-auto p-5 space-y-6 animate-fade-in">
+          <div className="pt-8 pb-6">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Мои сессии</h1>
+            <p className="text-muted-foreground">История ваших практик и заметки</p>
           </div>
 
-          <Tabs defaultValue="write" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-12 shadow-md">
-              <TabsTrigger value="write" className="text-base">
-                <Icon name="PenLine" size={18} className="mr-2" />
-                Написать
-              </TabsTrigger>
-              <TabsTrigger value="history" className="text-base">
-                <Icon name="History" size={18} className="mr-2" />
-                История
-              </TabsTrigger>
-            </TabsList>
+          <Card className="shadow-lg border-0 rounded-2xl">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base">Новая запись</CardTitle>
+              <CardDescription>Как прошла ваша практика?</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-3">
+                {['😊', '🙂', '😌', '😐', '😔'].map((emoji, i) => (
+                  <button
+                    key={i}
+                    className="flex-1 p-3 text-2xl rounded-xl bg-muted hover:bg-primary/10 transition-all hover:scale-110"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+              <Textarea 
+                placeholder="Поделитесь своими мыслями..."
+                className="resize-none h-24 rounded-xl border-2"
+              />
+              <Button className="w-full h-12 rounded-xl">
+                <Icon name="Plus" size={20} className="mr-2" />
+                Сохранить запись
+              </Button>
+            </CardContent>
+          </Card>
 
-            <TabsContent value="write" className="space-y-6 mt-6">
-              <Card className="shadow-xl border-2 border-primary/20">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Icon name="Sparkles" size={20} className="text-primary" />
-                    Новая запись
-                  </CardTitle>
-                  <CardDescription>Запишите свои мысли и чувства</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Моё настроение</label>
-                    <div className="flex justify-between gap-2">
-                      {(Object.keys(moodEmojis) as Mood[]).map((mood) => (
-                        <button
-                          key={mood}
-                          onClick={() => setSelectedMood(mood)}
-                          className={`flex-1 p-3 rounded-xl text-2xl transition-all hover:scale-105 shadow-md ${
-                            selectedMood === mood
-                              ? 'bg-primary/20 ring-2 ring-primary scale-105 shadow-lg'
-                              : 'bg-muted hover:bg-muted/80'
-                          }`}
-                          title={moodLabels[mood]}
-                        >
-                          {moodEmojis[mood]}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Что происходило?</label>
-                    <Textarea
-                      placeholder="Расскажите о своём дне, чувствах, мыслях..."
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      className="min-h-[140px] resize-none border-2 focus:border-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block flex items-center gap-1">
-                      <Icon name="Heart" size={16} className="text-red-500" />
-                      За что благодарны?
-                    </label>
-                    <Input
-                      placeholder="Напишите что-то хорошее из вашего дня..."
-                      value={newGratitude}
-                      onChange={(e) => setNewGratitude(e.target.value)}
-                      className="border-2 focus:border-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Теги</label>
-                    <div className="flex flex-wrap gap-2">
-                      {availableTags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant={selectedTags.includes(tag) ? 'default' : 'outline'}
-                          className="cursor-pointer hover:scale-105 transition-transform px-3 py-1"
-                          onClick={() => toggleTag(tag)}
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Button onClick={addDiaryEntry} className="w-full h-12 shadow-lg hover:shadow-xl transition-all hover:scale-102">
-                    <Icon name="Plus" size={20} className="mr-2" />
-                    Сохранить запись
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="history" className="space-y-4 mt-6">
-              <Card className="shadow-lg border-2 border-primary/10">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base">Статистика настроения</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {(Object.keys(moodEmojis) as Mood[]).map((mood) => {
-                      const count = moodStats[mood];
-                      const percentage = totalEntries > 0 ? (count / totalEntries) * 100 : 0;
-                      return (
-                        <div key={mood} className="space-y-1">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="flex items-center gap-2">
-                              <span className="text-xl">{moodEmojis[mood]}</span>
-                              <span>{moodLabels[mood]}</span>
-                            </span>
-                            <span className="font-semibold">{count} раз ({percentage.toFixed(0)}%)</span>
-                          </div>
-                          <Progress value={percentage} className="h-2" />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {diaryEntries.map((entry, index) => (
-                <Card
-                  key={entry.id}
-                  className={`shadow-lg transition-all hover:shadow-xl hover:scale-102 ${moodColors[entry.mood]} border-2 animate-fade-in`}
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="text-4xl">{moodEmojis[entry.mood]}</div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-medium">
-                            {new Date(entry.date).toLocaleDateString('ru-RU', {
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">История</h3>
+            {sessions.map((session) => (
+              <Card key={session.id} className="shadow-lg border-0 rounded-2xl hover:shadow-xl transition-all">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">{session.mood}</div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-semibold">{session.title}</h4>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(session.date).toLocaleDateString('ru-RU', {
                               day: 'numeric',
                               month: 'long',
-                              year: 'numeric',
                             })}
                           </p>
-                          <Badge variant="secondary" className="text-xs">
-                            {moodLabels[entry.mood]}
-                          </Badge>
                         </div>
-                        <p className="text-foreground font-serif leading-relaxed">{entry.note}</p>
+                        <button className="text-muted-foreground hover:text-foreground">
+                          <Icon name="MoreVertical" size={20} />
+                        </button>
                       </div>
+                      <p className="text-sm text-muted-foreground font-serif italic">{session.notes}</p>
                     </div>
-                    {entry.gratitude && (
-                      <div className="mt-3 p-3 bg-white/50 rounded-lg border border-red-200">
-                        <p className="text-sm flex items-start gap-2">
-                          <Icon name="Heart" size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
-                          <span className="italic">{entry.gratitude}</span>
-                        </p>
-                      </div>
-                    )}
-                    {entry.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-3">
-                        {entry.tags.map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            #{tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </TabsContent>
-          </Tabs>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {currentScreen === 'resources' && (
+        <div className="max-w-md mx-auto p-5 space-y-6 animate-fade-in">
+          <div className="pt-8 pb-6">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Ресурсы</h1>
+            <p className="text-muted-foreground">Материалы для вашего развития</p>
+          </div>
+
+          <Card className="shadow-xl border-0 rounded-3xl overflow-hidden">
+            <CardContent className="p-0">
+              <div className="bg-gradient-to-br from-secondary via-secondary/80 to-secondary/60 p-8 text-foreground">
+                <div className="text-5xl mb-4">📖</div>
+                <h3 className="text-2xl font-bold mb-2">Библиотека знаний</h3>
+                <p className="text-sm opacity-90 mb-6">Статьи, книги и рекомендации экспертов</p>
+                <Button className="bg-white text-foreground hover:bg-white/90 rounded-xl">
+                  Открыть
+                  <Icon name="ArrowRight" size={18} className="ml-2" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">Категории</h3>
+            
+            <Card className="shadow-lg border-0 rounded-2xl hover:shadow-xl transition-all cursor-pointer">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center text-3xl">
+                    🧘‍♀️
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold mb-1">Медитация и практики</h4>
+                    <p className="text-xs text-muted-foreground">12 материалов</p>
+                  </div>
+                  <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg border-0 rounded-2xl hover:shadow-xl transition-all cursor-pointer">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-accent to-accent/70 rounded-2xl flex items-center justify-center text-3xl">
+                    💭
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold mb-1">Психология и эмоции</h4>
+                    <p className="text-xs text-muted-foreground">24 материала</p>
+                  </div>
+                  <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg border-0 rounded-2xl hover:shadow-xl transition-all cursor-pointer">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-secondary to-secondary/70 rounded-2xl flex items-center justify-center text-3xl">
+                    ⚡
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold mb-1">Энергия и мотивация</h4>
+                    <p className="text-xs text-muted-foreground">18 материалов</p>
+                  </div>
+                  <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-lg border-0 rounded-2xl hover:shadow-xl transition-all cursor-pointer">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-300 rounded-2xl flex items-center justify-center text-3xl">
+                    🌿
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold mb-1">Осознанность</h4>
+                    <p className="text-xs text-muted-foreground">15 материалов</p>
+                  </div>
+                  <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 
       {currentScreen === 'profile' && (
-        <div className="max-w-md mx-auto p-4 space-y-6 animate-fade-in">
-          <div className="flex items-center justify-between pt-6 pb-4">
-            <button onClick={() => setCurrentScreen('home')} className="text-primary hover:scale-110 transition-transform">
-              <Icon name="ChevronLeft" size={28} />
-            </button>
-            <h1 className="text-2xl font-bold">Профиль</h1>
-            <div className="w-7" />
+        <div className="max-w-md mx-auto p-5 space-y-6 animate-fade-in">
+          <div className="pt-8 pb-6">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Профиль</h1>
+            <p className="text-muted-foreground">Ваши настройки и статистика</p>
           </div>
 
-          <Card className="shadow-xl border-2 border-primary/20 overflow-hidden">
-            <div className="h-24 bg-gradient-to-r from-primary via-secondary to-accent"></div>
-            <CardContent className="pt-0">
-              <div className="text-center -mt-14 mb-6">
-                <div className="w-28 h-28 mx-auto bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-2xl border-4 border-card">
-                  {(userName || 'У')[0].toUpperCase()}
+          <Card className="shadow-xl border-0 rounded-3xl overflow-hidden">
+            <div className="h-32 bg-gradient-to-r from-primary via-accent to-secondary"></div>
+            <CardContent className="pt-0 pb-8">
+              <div className="text-center -mt-16 mb-6">
+                <div className="w-32 h-32 mx-auto bg-gradient-to-br from-primary to-accent rounded-3xl flex items-center justify-center text-5xl font-bold text-white shadow-2xl border-4 border-white">
+                  {userName[0]}
                 </div>
-                <h2 className="text-2xl font-bold mt-4">{userName || 'Пользователь'}</h2>
-                <p className="text-muted-foreground">user@example.com</p>
-                <div className="flex items-center justify-center gap-4 mt-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{diaryEntries.length}</p>
-                    <p className="text-xs text-muted-foreground">Записей</p>
-                  </div>
-                  <div className="w-px h-8 bg-border"></div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-secondary">7</p>
-                    <p className="text-xs text-muted-foreground">Дней серия</p>
-                  </div>
-                  <div className="w-px h-8 bg-border"></div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-accent">{achievements.filter(a => a.unlocked).length}</p>
-                    <p className="text-xs text-muted-foreground">Достижений</p>
-                  </div>
+                <h2 className="text-2xl font-bold mt-4">{userName}</h2>
+                <p className="text-muted-foreground text-sm">anna@example.com</p>
+              </div>
+
+              <div className="flex justify-around py-4 border-t border-border">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">24</p>
+                  <p className="text-xs text-muted-foreground">Сессии</p>
+                </div>
+                <div className="w-px bg-border"></div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-accent">12</p>
+                  <p className="text-xs text-muted-foreground">Записей</p>
+                </div>
+                <div className="w-px bg-border"></div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-secondary">7</p>
+                  <p className="text-xs text-muted-foreground">Дней подряд</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl border-2 border-primary/10">
+          <Card className="shadow-lg border-0 rounded-2xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon name="Trophy" size={24} className="text-yellow-500" />
-                Достижения
-              </CardTitle>
+              <CardTitle className="text-base">Настройки</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {achievements.map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    achievement.unlocked
-                      ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 shadow-md'
-                      : 'bg-muted/30 border-transparent opacity-60'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="text-3xl">{achievement.icon}</div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold flex items-center gap-2">
-                        {achievement.title}
-                        {achievement.unlocked && <Icon name="CheckCircle2" size={16} className="text-green-600" />}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-2">{achievement.description}</p>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span>{achievement.progress}/{achievement.maxProgress}</span>
-                          <span>{((achievement.progress / achievement.maxProgress) * 100).toFixed(0)}%</span>
-                        </div>
-                        <Progress value={(achievement.progress / achievement.maxProgress) * 100} className="h-1.5" />
-                      </div>
-                    </div>
-                  </div>
+              <button className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-muted transition-all">
+                <div className="flex items-center gap-3">
+                  <Icon name="User" size={20} className="text-primary" />
+                  <span className="font-medium">Личные данные</span>
                 </div>
-              ))}
+                <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+              </button>
+              <button className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-muted transition-all">
+                <div className="flex items-center gap-3">
+                  <Icon name="Bell" size={20} className="text-accent" />
+                  <span className="font-medium">Уведомления</span>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+              </button>
+              <button className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-muted transition-all">
+                <div className="flex items-center gap-3">
+                  <Icon name="Shield" size={20} className="text-secondary" />
+                  <span className="font-medium">Приватность</span>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+              </button>
+              <button className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-muted transition-all">
+                <div className="flex items-center gap-3">
+                  <Icon name="HelpCircle" size={20} className="text-green-500" />
+                  <span className="font-medium">Помощь и поддержка</span>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-muted-foreground" />
+              </button>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl border-2 border-primary/10">
-            <CardContent className="p-4 space-y-2">
-              <Button variant="outline" className="w-full justify-start h-12 border-2 hover:border-primary transition-all">
-                <Icon name="Settings" size={20} className="mr-3" />
-                Настройки
-              </Button>
-              <Button variant="outline" className="w-full justify-start h-12 border-2 hover:border-primary transition-all">
-                <Icon name="Bell" size={20} className="mr-3" />
-                Уведомления
-              </Button>
-              <Button variant="outline" className="w-full justify-start h-12 border-2 hover:border-primary transition-all">
-                <Icon name="HelpCircle" size={20} className="mr-3" />
-                Помощь и поддержка
-              </Button>
-              <Button variant="outline" className="w-full justify-start h-12 border-2 hover:border-destructive text-destructive transition-all">
-                <Icon name="LogOut" size={20} className="mr-3" />
-                Выйти из аккаунта
-              </Button>
-            </CardContent>
-          </Card>
+          <Button variant="outline" className="w-full h-12 rounded-xl border-2 text-destructive hover:text-destructive">
+            <Icon name="LogOut" size={20} className="mr-2" />
+            Выйти
+          </Button>
         </div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t-2 border-border shadow-2xl z-50">
-        <div className="max-w-md mx-auto px-6 py-3 flex justify-around items-center">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t z-50 shadow-2xl">
+        <div className="max-w-md mx-auto px-6 py-4 flex justify-around items-center">
           <button
             onClick={() => setCurrentScreen('home')}
-            className={`flex flex-col items-center gap-1.5 transition-all hover:scale-110 ${
+            className={`flex flex-col items-center gap-1 transition-all ${
               currentScreen === 'home' ? 'text-primary scale-110' : 'text-muted-foreground'
             }`}
           >
-            <div className={`p-2 rounded-xl ${currentScreen === 'home' ? 'bg-primary/10' : ''}`}>
-              <Icon name="Home" size={22} />
+            <div className={`p-2 rounded-2xl ${currentScreen === 'home' ? 'bg-primary/10' : ''}`}>
+              <Icon name="Home" size={24} />
             </div>
-            <span className="text-xs font-semibold">Главная</span>
+            <span className="text-xs font-medium">Главная</span>
           </button>
           <button
-            onClick={() => setCurrentScreen('diary')}
-            className={`flex flex-col items-center gap-1.5 transition-all hover:scale-110 ${
-              currentScreen === 'diary' ? 'text-primary scale-110' : 'text-muted-foreground'
+            onClick={() => setCurrentScreen('sessions')}
+            className={`flex flex-col items-center gap-1 transition-all ${
+              currentScreen === 'sessions' ? 'text-primary scale-110' : 'text-muted-foreground'
             }`}
           >
-            <div className={`p-2 rounded-xl ${currentScreen === 'diary' ? 'bg-primary/10' : ''}`}>
-              <Icon name="BookOpen" size={22} />
+            <div className={`p-2 rounded-2xl ${currentScreen === 'sessions' ? 'bg-primary/10' : ''}`}>
+              <Icon name="Calendar" size={24} />
             </div>
-            <span className="text-xs font-semibold">Дневник</span>
+            <span className="text-xs font-medium">Сессии</span>
           </button>
           <button
-            onClick={() => setCurrentScreen('meditation')}
-            className={`flex flex-col items-center gap-1.5 transition-all hover:scale-110 ${
-              currentScreen === 'meditation' ? 'text-primary scale-110' : 'text-muted-foreground'
+            onClick={() => setCurrentScreen('resources')}
+            className={`flex flex-col items-center gap-1 transition-all ${
+              currentScreen === 'resources' ? 'text-primary scale-110' : 'text-muted-foreground'
             }`}
           >
-            <div className={`p-2 rounded-xl ${currentScreen === 'meditation' ? 'bg-primary/10' : ''}`}>
-              <Icon name="Headphones" size={22} />
+            <div className={`p-2 rounded-2xl ${currentScreen === 'resources' ? 'bg-primary/10' : ''}`}>
+              <Icon name="BookOpen" size={24} />
             </div>
-            <span className="text-xs font-semibold">Медитация</span>
+            <span className="text-xs font-medium">Ресурсы</span>
           </button>
           <button
             onClick={() => setCurrentScreen('profile')}
-            className={`flex flex-col items-center gap-1.5 transition-all hover:scale-110 ${
+            className={`flex flex-col items-center gap-1 transition-all ${
               currentScreen === 'profile' ? 'text-primary scale-110' : 'text-muted-foreground'
             }`}
           >
-            <div className={`p-2 rounded-xl ${currentScreen === 'profile' ? 'bg-primary/10' : ''}`}>
-              <Icon name="User" size={22} />
+            <div className={`p-2 rounded-2xl ${currentScreen === 'profile' ? 'bg-primary/10' : ''}`}>
+              <Icon name="User" size={24} />
             </div>
-            <span className="text-xs font-semibold">Профиль</span>
+            <span className="text-xs font-medium">Профиль</span>
           </button>
         </div>
       </nav>
